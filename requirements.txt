@@ -1,0 +1,35 @@
+# Interfaz de usuario
+flet==0.28.2            # Framework principal para UI web y escritorio
+flet-desktop==0.28.2    # Soporte para empaquetar como aplicación de escritorio
+flet-webview==0.1.0    # Integración con WebView (si se usa)
+
+# Manipulación y análisis de datos
+pandas>=2.2.2           # Manipulación de datos
+numpy>=1.26.4           # Cálculos numéricos (usado por pandas)
+duckdb>=0.10.0          # Consultas SQL sobre DataFrames
+scipy>=1.11.2           # Cálculos numéricos avanzados
+
+# Visualización de datos
+matplotlib>=3.8.4       # Gráficos básicos
+seaborn>=0.13.2         # Gráficos estadísticos sobre matplotlib
+
+# Calidad de código y herramientas de desarrollo
+black>=24.0.0           # Formateador automático
+flake8>=7.0.0           # Verificación de estilo de código
+isort>=5.13.0           # Ordenamiento automático de imports
+pytest>=8.1.1           # Testing unitario y de integración
+
+# Utilidades (solo si usas paquetes en consola o logs)
+tabulate>=0.9.0         # Tablas en formato texto (para consola, si se desea)
+ReportLab               # Para generación de PDFs
+
+# Empaquetado (si usas build tradicional para escritorio)
+pyinstaller>=6.6.0      # Crear ejecutables de escritorio (opcional)
+
+# Gestión de entorno y dependencias (si usas Poetry o PDM)
+# poetry>=1.8.2         # Alternativa moderna a pip + requirements.txt
+# pdm>=2.12.0           # Otra alternativa moderna (opcional)
+
+# Notas:
+# - Puedes usar `pip freeze > requirements.txt` luego de probar todo.
+# - Si usas `pyproject.toml`, muchas versiones se pueden dejar sin fijar para evitar bloqueos de compatibilidad.
