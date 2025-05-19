@@ -146,7 +146,7 @@ Este proyecto está licenciado bajo la **MIT License**.
 
 ## ✍️ Autor
 
-✍️ **Desarrollado por:** **Deyton Riasco Ortiz**  
+✍️ **Desarrollado por:** **Deyton Riascos Ortiz**  
 🗓️ **Fecha:** 2025  
 
 ---
