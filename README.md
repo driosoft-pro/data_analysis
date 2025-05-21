@@ -42,6 +42,11 @@ Este proyecto es una aplicación de escritorio y web construida con [Python](htt
 > - black
 > - flake8
 > - isort
+> - ReportLab 
+> - openpyxl
+> - xlrd
+
+
 
 ## ⚙️ Características de Librerías Necesarias
 
@@ -66,6 +71,11 @@ Este proyecto es una aplicación de escritorio y web construida con [Python](htt
 - [`black`](https://github.com/psf/black): Formateador automático.
 - [`flake8`](https://flake8.pycqa.org/): Linter de estilo.
 - [`isort`](https://pycqa.github.io/isort/): Ordena imports automáticamente.
+
+### Utilidades
+- [`ReportLab`](https://www.reportlab.com/): Generación de PDFs.
+- [`openpyxl`](https://openpyxl.readthedocs.io/en/stable/): Leer y escribir archivos Excel.
+- [`xlrd`](https://pypi.org/project/xlrd/): Leer y escribir archivos Excel.
 
 ---
 
@@ -100,6 +110,7 @@ data_analysis/
 │   ├── data_loader.py                  # Carga de datos
 │   ├── data_analyzer.py                # Análisis de datos
 │   ├── query_engine.py                 # Motor de consulta SQL
+│   ├── file_processor.py               # Procesamiento de archivos
 │   └── plot_generator.py               # Generación de gráficos
 │
 ├── tests/                              # Pruebas unitarias 

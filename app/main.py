@@ -1,4 +1,13 @@
 import flet as ft
+import sys
+import os
+
+# Añadir el directorio raíz del proyecto al sys.path
+# Esto permite que Python encuentre los módulos 'views' y 'core' correctamente
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(current_dir, '..')) # Sube un nivel desde 'app'
+sys.path.insert(0, project_root)
+
 from views.bar_navigation import create_navigation_rail
 from views.home_view import HomePage
 from views.file_upload_view import FileUploadPage
@@ -8,6 +17,14 @@ from views.library_view import LibraryPage
 from views.about_view import AboutPage
 from views.export_pdf_view import ExportPDFPage
 from views.search_view import SearchPage
+
+# Importar las clases de la capa core
+from core.data_loader import DataLoader
+from core.data_analyzer import DataAnalyzer
+from core.query_engine import QueryEngine
+from core.plot_generator import PlotGenerator
+from core.file_processor import FileProcessor
+
 from constants import (
     VIEW_HOME,
     VIEW_UPLOAD,
@@ -22,7 +39,7 @@ from constants import (
 class AppState:
     """
     Una clase simple para manejar el estado compartido de la aplicación.
-    Por ahora, solo almacena el DataFrame cargado.
+    Almacena el DataFrame cargado y el nombre del archivo.
     """
     def __init__(self):
         self.df = None  # Aquí se almacenará el DataFrame de Pandas
@@ -30,96 +47,120 @@ class AppState:
         self.current_theme = ft.ThemeMode.LIGHT  # Tema actual
 
     def load_dataframe(self, dataframe, file_name=None):
+        """Carga el DataFrame y el nombre del archivo en el estado."""
         self.df = dataframe
         self.loaded_file_name = file_name
-        print(f"DataFrame cargado en AppState desde {file_name}")
+        print(f"AppState: DataFrame cargado desde {file_name if file_name else 'memoria'}")
 
     def get_dataframe(self):
+        """Retorna el DataFrame cargado."""
         return self.df
 
     def get_loaded_file_name(self):
+        """Retorna el nombre del archivo cargado."""
         return self.loaded_file_name
 
     def toggle_theme(self):
-        """Alterna entre tema claro y oscuro"""
+        """Alterna entre tema claro y oscuro."""
         self.current_theme = (
-            ft.ThemeMode.LIGHT 
-            if self.current_theme == ft.ThemeMode.DARK 
+            ft.ThemeMode.LIGHT
+            if self.current_theme == ft.ThemeMode.DARK
             else ft.ThemeMode.DARK
         )
         return self.current_theme
 
 def main(page: ft.Page):
+    # Configuración inicial de la página
     page.title = "Data Análisis App - MugenC-Data"
-    page.theme_mode = ft.ThemeMode.LIGHT  # Tema inicial
-    
-    # Instancia del estado de la aplicación
+    page.theme_mode = ft.ThemeMode.LIGHT
+    page.padding = ft.padding.only(left=10)
+
+    # Estado de la aplicación
     app_state = AppState()
 
-    # Referencia al NavigationRail para poder controlarlo desde main
+    # Instancias de las clases de la capa core
+    data_loader = DataLoader()
+    data_analyzer = DataAnalyzer()
+    query_engine = QueryEngine()
+    plot_generator = PlotGenerator()
+    file_processor = FileProcessor()
+
+    # Referencia al NavigationRail
     navigation_rail_ref = ft.Ref[ft.NavigationRail]()
 
-    # Contenedor principal para el contenido de la vista
+    # Área de contenido principal
     main_content_area = ft.Container(
-        content=ft.Text("Selecciona una opción del menú"),  # Contenido inicial
-        expand=True,  # Para que ocupe el espacio disponible
-        padding=ft.padding.all(20),
-        alignment=ft.alignment.center  # Centra el contenido vertical y horizontalmente
+        content=ft.Text("Selecciona una opción del menú"),
+        padding=ft.padding.symmetric(horizontal=20),
+        alignment=ft.alignment.top_left,
+        expand=True
     )
 
-    # Lista que mapea los índices del NavigationRail a las rutas de vista.
-    # El orden debe coincidir con los destinos definidos en bar_navigation.py
-    # (excluyendo el primer elemento que es el botón de tema)
+    # Rutas de vista (ordenadas para coincidir con NavigationRail)
+    # El orden aquí DEBE coincidir con el orden de los destinos en bar_navigation.py
+    # (después del botón de tema, que es el índice 0 del rail)
     view_routes_by_index = [
-        VIEW_HOME,
-        VIEW_SEARCH,
-        VIEW_UPLOAD,
-        VIEW_EXPORT,
-        VIEW_LIBRARY,
-        VIEW_ABOUT,
+        VIEW_HOME,      # Corresponde a rail_index 1
+        VIEW_SEARCH,    # Corresponde a rail_index 2
+        VIEW_UPLOAD,    # Corresponde a rail_index 3
+        VIEW_DISPLAY,   # Corresponde a rail_index 4
+        VIEW_QUERY,     # Corresponde a rail_index 5
+        VIEW_EXPORT,    # Corresponde a rail_index 6
+        VIEW_LIBRARY,   # Corresponde a rail_index 7
+        VIEW_ABOUT,     # Corresponde a rail_index 8
     ]
 
+    # Instancias de las vistas, pasando app_state y las clases de core/
+    # Es crucial pasar las instancias de core a las vistas que las usarán
+    home_page = HomePage(page, app_state)
+    file_upload_page = FileUploadPage(page, app_state, data_loader=data_loader)
+    data_display_page = DataDisplayPage(page, app_state, data_analyzer=data_analyzer, plot_generator=plot_generator)
+    query_page = QueryPage(page, app_state, query_engine=query_engine)
+    library_page = LibraryPage(page, app_state)
+    about_page = AboutPage(page, app_state)
+    export_pdf_page = ExportPDFPage(page, app_state)
+    search_page = SearchPage(page, app_state)
+
+
+    # Función para cambiar de vista
     def change_view(selected_route):
-        """
-        Cambia la vista mostrada en el área de contenido principal
-        basándose en la ruta seleccionada.
-        """
-        nonlocal main_content_area  # Para modificar la variable del alcance exterior
+        nonlocal main_content_area
         print(f"Cambiando vista a: {selected_route}")
 
-        # Instancia la vista correcta basada en la ruta y asigna su contenido
+        # Asigna la instancia de la vista directamente, ya que ahora son ft.Container
+        # Esto es clave: NO LLAMAR A .build() aquí.
         if selected_route == VIEW_HOME:
-            main_content_area.content = HomePage(page, app_state).build()
+            main_content_area.content = home_page
         elif selected_route == VIEW_UPLOAD:
-            main_content_area.content = FileUploadPage(page, app_state).build()
+            main_content_area.content = file_upload_page
         elif selected_route == VIEW_DISPLAY:
-            main_content_area.content = DataDisplayPage(page, app_state).build()
+            main_content_area.content = data_display_page
         elif selected_route == VIEW_QUERY:
-            main_content_area.content = QueryPage(page, app_state).build()
+            main_content_area.content = query_page
         elif selected_route == VIEW_LIBRARY:
-            main_content_area.content = LibraryPage(page, app_state).build()
+            main_content_area.content = library_page
         elif selected_route == VIEW_ABOUT:
-            main_content_area.content = AboutPage(page, app_state).build()
+            main_content_area.content = about_page
         elif selected_route == VIEW_EXPORT:
-            main_content_area.content = ExportPDFPage(page, app_state).build()
+            main_content_area.content = export_pdf_page
         elif selected_route == VIEW_SEARCH:
-            main_content_area.content = SearchPage(page, app_state).build()
+            main_content_area.content = search_page
         else:
             main_content_area.content = ft.Text(f"Error: Vista no encontrada para la ruta '{selected_route}'")
 
         page.update()
 
+    # Funciones para el tema
     def toggle_theme():
-        """Alterna entre tema claro y oscuro"""
         page.theme_mode = app_state.toggle_theme()
         update_theme_icon()
         page.update()
 
     def update_theme_icon():
-        """Actualiza el icono del tema en la barra de navegación"""
         if navigation_rail_ref.current:
             destinations = navigation_rail_ref.current.destinations
-            if destinations is not None and len(destinations) > 0:
+            if destinations and len(destinations) > 0:
+                # El primer destino es el botón de tema
                 if page.theme_mode == ft.ThemeMode.DARK:
                     destinations[0].icon = ft.Icons.LIGHT_MODE_OUTLINED
                     destinations[0].selected_icon = ft.Icons.LIGHT_MODE
@@ -128,39 +169,37 @@ def main(page: ft.Page):
                     destinations[0].icon = ft.Icons.DARK_MODE_OUTLINED
                     destinations[0].selected_icon = ft.Icons.DARK_MODE
                     destinations[0].label = "Tema oscuro"
+                page.update() # Asegurarse de que el icono se actualice
 
+    # Función para alternar la barra de navegación
     def toggle_navigation_rail(e):
-        """
-        Alterna el estado extendido del NavigationRail y ajusta el tipo de etiqueta.
-        """
         current_rail = navigation_rail_ref.current
-        current_rail.extended = not current_rail.extended
+        if current_rail:
+            current_rail.extended = not current_rail.extended
+            current_rail.label_type = (
+                ft.NavigationRailLabelType.ALL
+                if current_rail.extended
+                else ft.NavigationRailLabelType.NONE
+            )
+            app_title_text.visible = current_rail.extended
+            page.update()
 
-        # Ajusta el label_type basado en si está extendido o no
-        if current_rail.extended:
-            current_rail.label_type = ft.NavigationRailLabelType.ALL
-            app_title_text.visible = True
-        else:
-            current_rail.label_type = ft.NavigationRailLabelType.NONE
-            app_title_text.visible = False
-
-        page.update()
-
-    # Crear la barra de navegación lateral
+    # Crear barra de navegación
     create_navigation_rail(
+        page=page,
         on_change_view=change_view,
         on_toggle_theme=toggle_theme,
         view_routes_by_index=view_routes_by_index,
         rail_state=navigation_rail_ref,
     )
 
-    # Elemento de texto para el título de la app en la barra superior
-    app_title_text = ft.Text("Data Análisis App", weight=ft.FontWeight.BOLD, size=18)
+    # Título de la aplicación
+    app_title_text = ft.Text("Data Análisis", weight=ft.FontWeight.BOLD, size=18)
 
-    # Layout principal de la página
+    # Layout principal
     main_layout = ft.Column(
         [
-            # Barra superior simple con el botón de menú y título
+            # Barra superior
             ft.Row(
                 [
                     ft.IconButton(
@@ -174,7 +213,8 @@ def main(page: ft.Page):
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
             ),
             ft.Divider(height=1, color=ft.Colors.BLACK26),
-            # Este Row contendrá la barra de navegación y el área de contenido principal
+
+            # Contenido principal
             ft.Row(
                 [
                     navigation_rail_ref.current if navigation_rail_ref.current else ft.Container(),
@@ -188,15 +228,17 @@ def main(page: ft.Page):
         expand=True,
     )
 
-    # Añadimos el layout principal a la página
+    # Añadir layout a la página
     page.add(main_layout)
 
-    # Establecer la vista inicial (Inicio)
+    # Configuración inicial
     if navigation_rail_ref.current:
-        navigation_rail_ref.current.selected_index = 1  # El índice 1 corresponde a "Inicio"
+        # El índice 1 corresponde a "Inicio" si el botón de tema es el índice 0
+        navigation_rail_ref.current.selected_index = 1
         change_view(VIEW_HOME)
-        update_theme_icon()  # Actualizar el icono del tema al inicio
+        update_theme_icon()
+
 
 if __name__ == "__main__":
-    ft.app(target=main, assets_dir="assets")
-    # ft.app(target=main, assets_dir="assets", view=ft.AppView.WEB_BROWSER)     # Para ejecutar en modo web
+    #ft.app(target=main, assets_dir="assets")    # Para ejecutar en modo desktop
+    ft.app(target=main, assets_dir="assets", view=ft.AppView.WEB_BROWSER)     # Para ejecutar en modo web
