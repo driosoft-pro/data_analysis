@@ -1,7 +1,5 @@
 # Analizador de Datos con Python y Flet
 
-
-# Data Analisis App
 [![Data-Analysis-App.png](https://i.postimg.cc/ncG0nRrB/Data-Analysis-App.png)](https://postimg.cc/9rzGpBGQ)
 
 
@@ -76,11 +74,14 @@ Este proyecto es una aplicación de escritorio y web construida con [Python](htt
 - [`black`](https://github.com/psf/black): Formateador automático.
 - [`flake8`](https://flake8.pycqa.org/): Linter de estilo.
 - [`isort`](https://pycqa.github.io/isort/): Ordena imports automáticamente.
+- [`tabulate`](https://pypi.org/project/tabulate/): Impresión de tablas en consola.tabulate
 
 ### Utilidades
 - [`ReportLab`](https://www.reportlab.com/): Generación de PDFs.
 - [`openpyxl`](https://openpyxl.readthedocs.io/en/stable/): Leer y escribir archivos Excel.
 - [`xlrd`](https://pypi.org/project/xlrd/): Leer y escribir archivos Excel.
+- [`reportlab`](https://pypi.org/project/reportlab/): Generación de PDFs.
+- [`time`](https://docs.python.org/3/library/time.html): Manipulación de fechas y horas.
 
 ---
 
