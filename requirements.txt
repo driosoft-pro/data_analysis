@@ -53,7 +53,7 @@ pyinstaller==6.13.0       # Crear ejecutables nativos
 pyinstaller-hooks-contrib==2025.4 # Complementos para PyInstaller
 
 # Repositorio personalizado (tu proyecto)
--e git+https://github.com/driosoft-pro/data_analysis.git@2cb5fabe026bded5c882d3361c95d7026b350e38#egg=analizador_datos
+#-e git+https://github.com/driosoft-pro/data_analysis.git@2cb5fabe026bded5c882d3361c95d7026b350e38#egg=analizador_datos
 
 # Gestión de entorno y dependencias (si usas Poetry o PDM)
 # poetry>=1.8.2           # Alternativa moderna a pip + requirements.txt

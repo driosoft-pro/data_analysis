@@ -28,7 +28,7 @@ class HomePage(ft.Container): # Hereda de ft.Container
                     text_align=ft.TextAlign.CENTER
                 ),
                 ft.Text(
-                    "Luego podrás visualizar los datos, realizar búsquedas, ejecutar consultas SQL y más.",
+                    "Luego podrás visualizar los datos, realizar búsquedas, ejecutar consultas SQL.",
                     text_align=ft.TextAlign.CENTER
                 ),
                 ft.Container(height=20), # Espaciador
